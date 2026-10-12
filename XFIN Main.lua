@@ -20,7 +20,9 @@ local player = Players.LocalPlayer
 local ui = XfinUI.new(player:WaitForChild("PlayerGui"))
 
 XfinBackend.attach(ui)
-
+ui.Callbacks.RunScript = function(fileName, source)
+    ui:Success("Run connected: " .. tostring(fileName))
+end
 -- Connect the Run button
 ui.Callbacks.Runscript = function(source)
     if type(source) ~= "string" or source:match("^%s*$") then
