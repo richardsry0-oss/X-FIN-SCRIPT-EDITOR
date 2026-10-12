@@ -1,11 +1,23 @@
--- XFIN SCRIPT EDITER bootstrap (LocalScript).
--- Place this LocalScript, XfinUI and XfinBackend (ModuleScripts) together,
--- e.g. all inside StarterPlayer > StarterPlayerScripts.
-
 local Players = game:GetService("Players")
 
-local XfinUI = require(script.Parent:WaitForChild("XfinUI"))
-local XfinBackend = require(script.Parent:WaitForChild("XfinBackend"))
+local BASE = "https://raw.githubusercontent.com/richardsry0-oss/X-FIN-SCRIPT-EDITOR/main/"
 
-local ui = XfinUI.new(Players.LocalPlayer:WaitForChild("PlayerGui"))
+local function getModule(filename)
+    local url = BASE .. filename
+    local source = game:HttpGet(url)
+    local fn, err = loadstring(source)
+
+    assert(fn, err or "Compilation failed: " .. filename)
+
+    return fn()
+end
+
+local XfinUI = getModule("XfinUI.lua")
+local XfinBackend = getModule("XfinBackend.lua")
+
+local player = Players.LocalPlayer
+local ui = XfinUI.new(player:WaitForChild("PlayerGui"))
+
 XfinBackend.attach(ui)
+
+print("XFIN loaded!")
