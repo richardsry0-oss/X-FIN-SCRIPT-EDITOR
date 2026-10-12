@@ -22,7 +22,7 @@ local ui = XfinUI.new(player:WaitForChild("PlayerGui"))
 XfinBackend.attach(ui)
 
 -- Connect the Run button
-ui.Callbacks.runscript = function(source)
+ui.Callbacks.Runscript = function(source)
     if type(source) ~= "string" or source:match("^%s*$") then
         ui:Warn("Nothing to run.")
         return
