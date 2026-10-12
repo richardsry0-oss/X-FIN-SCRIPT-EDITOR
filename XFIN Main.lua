@@ -8,25 +8,27 @@ local function getModule(filename)
     local source = game:HttpGet(url)
     local fn, err = loadstring(source)
 
-    assert(fn, err or "Compilation failed: " .. filename)
+    assert(fn, err or ("Compilation failed: " .. filename))
 
     return fn()
 end
 
+-- Load XFIN modules
 local XfinUI = getModule("XfinUI.lua")
 local XfinBackend = getModule("XfinBackend.lua")
 
+-- Create the UI
 local player = Players.LocalPlayer
-local ui = XfinUI.new(player:WaitForChild("PlayerGui"))
+local playerGui = player:WaitForChild("PlayerGui")
+local ui = XfinUI.new(playerGui)
 
+-- Attach the existing script editor backend
 XfinBackend.attach(ui)
-ui.Callbacks.RunScript = function(fileName, source)
-    ui:Success("Run connected: " .. tostring(fileName))
-end
+
 -- Connect the Run button
-ui.Callbacks.Runscript = function(source)
+ui.Callbacks.RunScript = function(fileName, source)
     if type(source) ~= "string" or source:match("^%s*$") then
-        ui:Warn("Nothing to run.")
+        ui:Warn("The editor is empty.")
         return
     end
 
@@ -35,9 +37,12 @@ ui.Callbacks.Runscript = function(source)
         return
     end
 
-    local okCompile, fn, compileError = pcall(loadstring, source)
+    -- Compile the source
+    local compileOK, fn, compileError = pcall(function()
+        return loadstring(source)
+    end)
 
-    if not okCompile then
+    if not compileOK then
         ui:Error("Compile error: " .. tostring(fn))
         return
     end
@@ -47,14 +52,17 @@ ui.Callbacks.Runscript = function(source)
         return
     end
 
-    local okRun, runtimeError = pcall(fn)
+    ui:Info("Running " .. tostring(fileName or "script") .. "...")
 
-    if not okRun then
-        ui:Error("Runtime error: " .. tostring(runtimeError))
+    -- Execute in the current client/executor environment
+    local runOK, result = pcall(fn)
+
+    if not runOK then
+        ui:Error("Runtime error: " .. tostring(result))
         return
     end
 
-    ui:Success("Script executed.")
+    ui:Success("Finished running " .. tostring(fileName or "script"))
 end
 
-print("XFIN loaded!")
+print("XFIN loaded with Run callback!")
